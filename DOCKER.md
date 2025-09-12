@@ -4,12 +4,31 @@
 
 本项目已配置自动构建Docker镜像并推送到GitHub Container Registry (ghcr.io)。
 
+### 多架构支持
+
+本项目支持以下CPU架构：
+- **linux/amd64** (x86_64) - Intel/AMD 处理器
+- **linux/arm64** (ARM64) - Apple M1/M2、ARM 服务器
+
+Docker 会自动选择匹配您系统架构的镜像版本。
+
 ### 可用镜像标签
 
 - `ghcr.io/cipherorcom/zerou-imgbed:latest` - 最新稳定版本
 - `ghcr.io/cipherorcom/zerou-imgbed:main` - 主分支最新版本
 - `ghcr.io/cipherorcom/zerou-imgbed:develop` - 开发分支版本
 - `ghcr.io/cipherorcom/zerou-imgbed:v*` - 发布版本标签
+
+### 验证架构支持
+
+```bash
+# 查看镜像支持的架构
+docker buildx imagetools inspect ghcr.io/cipherorcom/zerou-imgbed:latest
+
+# 强制拉取特定架构的镜像
+docker pull --platform linux/amd64 ghcr.io/cipherorcom/zerou-imgbed:latest
+docker pull --platform linux/arm64 ghcr.io/cipherorcom/zerou-imgbed:latest
+```
 
 ## 部署方式
 

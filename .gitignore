@@ -1,8 +1,41 @@
+# 依赖目录
 node_modules/
+
+# 环境配置
 .env
+
+# 数据库文件
 database/
+prisma/db/
+
+# 上传文件目录
 uploads/
+
+# 日志文件
 logs/
 *.log
+
+# 临时文件
 *.tmp
+*.temp
+
+# 系统文件
 .DS_Store
+Thumbs.db
+
+# 编辑器文件
+.vscode/settings.json
+.idea/
+
+# 构建文件
+dist/
+build/
+
+# 测试覆盖率
+coverage/
+
+# 包管理器（保留 package-lock.json 用于 Docker 构建）
+yarn.lock
+
+# Docker 相关
+*.dockerfile.bak
