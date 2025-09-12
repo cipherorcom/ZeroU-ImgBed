@@ -1,0 +1,14 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "安装依赖",
+			"type": "shell",
+			"command": "npm install",
+			"problemMatcher": [
+				"$eslint-stylish"
+			],
+			"group": "build"
+		}
+	]
+}

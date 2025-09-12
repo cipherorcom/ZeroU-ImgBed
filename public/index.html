@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroU图床 - 简单易用的图片托管服务</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        /* 深色主题 */
+        body.dark-theme {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #e0e0e0;
+        }
+        
+        body.dark-theme .upload-area {
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+        }
+        
+        body.dark-theme .upload-zone {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+        }
+        
+        body.dark-theme .upload-zone:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        body.dark-theme .image-preview {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        
+        body.dark-theme .file-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #e0e0e0;
+        }
+        
+        body.dark-theme .btn-primary {
+            background: linear-gradient(45deg, #4f46e5, #7c3aed);
+        }
+        
+        body.dark-theme .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* 主题切换按钮 */
+        .theme-toggle {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px) rotate(180deg);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* 用户状态栏样式 - 现代化设计 */
+        .user-status {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-info {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 12px 20px;
+            border-radius: 50px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .user-info:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+        }
+        
+        .user-info .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.85rem;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .user-info span {
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .login-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            min-width: 100px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .nav-btn:hover::before {
+            left: 100%;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .nav-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-btn.primary {
+            background: linear-gradient(45deg, #10b981, #059669);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+        }
+        
+        .nav-btn.primary:hover {
+            background: linear-gradient(45deg, #059669, #047857);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
+        
+        .nav-btn.secondary {
+            background: linear-gradient(45deg, #6366f1, #4f46e5);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+        }
+        
+        .nav-btn.secondary:hover {
+            background: linear-gradient(45deg, #4f46e5, #4338ca);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+        }
+        
+        .nav-btn.danger {
+            background: linear-gradient(45deg, #ef4444, #dc2626);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+        }
+        
+        .nav-btn.danger:hover {
+            background: linear-gradient(45deg, #dc2626, #b91c1c);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-logout {
+            background: #dc3545 !important;
+            color: white !important;
+            padding: 8px 16px !important;
+            border-radius: 20px !important;
+            font-size: 0.9rem !important;
+            border: none !important;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-logout:hover {
+            background: #c82333 !important;
+            transform: translateY(-1px);
+        }
+        
+        .login-buttons .btn {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .login-buttons .btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+
+        /* 管理后台按钮样式 */
+        #adminBtn {
+            background: #28a745 !important;
+            color: white !important;
+            padding: 8px 16px !important;
+            border-radius: 20px !important;
+            font-size: 0.9rem !important;
+            border: none !important;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        #adminBtn:hover {
+            background: #218838 !important;
+            transform: translateY(-1px);
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .upload-area {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .upload-zone {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 60px 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-zone:hover {
+            border-color: #667eea;
+            background-color: #f8f9ff;
+        }
+        
+        .upload-text small {
+            color: #888;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: block;
+        }
+        
+        .upload-zone.dragover {
+            border-color: #667eea;
+            background-color: #f0f2ff;
+            transform: scale(1.02);
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .upload-text {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .upload-hint {
+            font-size: 0.9rem;
+            color: #999;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #f0f0f0;
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .result-area {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: none;
+        }
+        
+        body.dark-theme .result-area {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .result-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            background: #ffffff;
+        }
+        
+        body.dark-theme .result-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .result-thumbnail {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-right: 15px;
+        }
+        
+        .result-info {
+            flex: 1;
+        }
+        
+        .result-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        body.dark-theme .result-name {
+            color: #f8f9fa;
+        }
+        
+        .result-url {
+            color: #666;
+            font-size: 0.9rem;
+            word-break: break-all;
+        }
+        
+        .copy-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .copy-btn:hover {
+            background: #218838;
+        }
+        
+        .link-formats {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        body.dark-theme .link-formats {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .format-group {
+            margin-bottom: 12px;
+        }
+        
+        .format-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .format-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+        }
+        
+        body.dark-theme .format-label {
+            color: #e9ecef;
+        }
+        
+        .format-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .format-text {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            background: white;
+            color: #495057;
+            word-break: break-all;
+        }
+        
+        body.dark-theme .format-text {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #f8f9fa;
+        }
+        
+        .format-copy-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+        
+        .format-copy-btn:hover {
+            background: #0056b3;
+        }
+        
+        .footer {
+            text-align: center;
+            color: white;
+            opacity: 0.8;
+            margin-top: 40px;
+        }
+        
+        .error-message {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 15px 0;
+            position: relative;
+            z-index: 1100;
+        }
+        
+        .success-message {
+            color: #155724;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 15px 0;
+            position: relative;
+            z-index: 1100;
+        }
+        
+        .info-message {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 15px 0;
+            position: relative;
+            z-index: 1100;
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        /* 深色主题模态框 */
+        body.dark-theme .modal-content {
+            background-color: #2d3748;
+            color: #e0e0e0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        body.dark-theme .close {
+            color: #a0a0a0;
+        }
+        
+        body.dark-theme .close:hover {
+            color: #e0e0e0;
+        }
+        
+        body.dark-theme .form-group input {
+            background-color: #4a5568;
+            border-color: #6b7280;
+            color: #e0e0e0;
+        }
+        
+        body.dark-theme .form-group input:focus {
+            border-color: #8b5cf6;
+            background-color: #374151;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            right: 15px;
+            top: 10px;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <!-- 主题切换按钮 -->
+    <button class="theme-toggle" id="themeToggle" title="切换主题">
+        🌙
+    </button>
+    
+    <!-- 用户状态栏 - 现代化导航 -->
+    <div class="user-status" id="userStatus">
+        <div class="user-info" id="userInfo" style="display: none;">
+            <div class="user-avatar" id="userAvatar">A</div>
+            <span id="welcomeText">欢迎，用户</span>
+            <button class="nav-btn danger" id="logoutBtn">🚪 登出</button>
+        </div>
+        <div class="login-buttons" id="loginButtons">
+            <button class="nav-btn primary" id="loginBtn">🔑 登录</button>
+            <button class="nav-btn secondary" id="registerBtn">📝 注册</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>ZeroU图床</h1>
+            <p>简单、快速、可靠的图片托管服务</p>
+        </div>
+        
+        <div class="upload-area">
+                    <div class="upload-zone" id="uploadZone">
+            <div class="upload-icon">�</div>
+            <div class="upload-text">
+                点击选择文件 或 拖拽文件到此处<br>
+                <small>支持 Ctrl+V 粘贴图片</small>
+            </div>
+            <input type="file" id="fileInput" multiple accept="image/*" hidden>
+        </div>
+            
+            <input type="file" id="fileInput" class="file-input" multiple accept="image/*">
+            <button class="btn" id="uploadBtn">选择图片</button>
+            <button class="btn" id="clearBtn" style="background: #6c757d;">清除</button>
+            
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div id="messageArea"></div>
+        </div>
+        
+        <div class="result-area" id="resultArea">
+            <h3 style="margin-bottom: 20px;">上传结果</h3>
+            <div id="resultList"></div>
+        </div>
+        
+        <div class="footer">
+            <p>Powered by cipheror | 基于 Node.js + Fastify 构建</p>
+        </div>
+    </div>
+
+    <!-- 登录模态框 -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <span class="close" id="loginClose">&times;</span>
+            <h2>登录</h2>
+            <div id="loginMessage" style="display: none;"></div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginUsername">用户名:</label>
+                    <input type="text" id="loginUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">密码:</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn">登录</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 注册模态框 -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <span class="close" id="registerClose">&times;</span>
+            <h2>注册</h2>
+            <div id="registerMessage" style="display: none;"></div>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerUsername">用户名:</label>
+                    <input type="text" id="registerUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">邮箱:</label>
+                    <input type="email" id="registerEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">密码:</label>
+                    <input type="password" id="registerPassword" required minlength="6">
+                    <small style="color: #666; font-size: 12px;">密码至少6位字符</small>
+                </div>
+                <button type="submit" class="btn">注册</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // DOM 元素
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const messageArea = document.getElementById('messageArea');
+        const resultArea = document.getElementById('resultArea');
+        const resultList = document.getElementById('resultList');
+        
+        // 用户相关元素
+        const userInfo = document.getElementById('userInfo');
+        const loginButtons = document.getElementById('loginButtons');
+        const welcomeText = document.getElementById('welcomeText');
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        
+        // 模态框元素
+        const loginModal = document.getElementById('loginModal');
+        const registerModal = document.getElementById('registerModal');
+        const loginClose = document.getElementById('loginClose');
+        const registerClose = document.getElementById('registerClose');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        
+        // 用户状态
+        let currentUser = null;
+        let authToken = localStorage.getItem('authToken');
+        
+        // 检查用户登录状态
+        function checkAuthStatus() {
+            if (authToken) {
+                // 验证token是否有效
+                fetch('/api/auth/me', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Token无效');
+                    }
+                }).then(data => {
+                    currentUser = data.user;
+                    updateUserUI();
+                }).catch(() => {
+                    // Token无效，清除
+                    localStorage.removeItem('authToken');
+                    authToken = null;
+                    updateUserUI();
+                });
+            } else {
+                updateUserUI();
+            }
+        }
+        
+        // 更新用户界面
+        function updateUserUI() {
+            if (currentUser) {
+                userInfo.style.display = 'flex';
+                loginButtons.style.display = 'none';
+                welcomeText.textContent = `${currentUser.username}`;
+                
+                // 更新用户头像显示首字母
+                const userAvatar = document.getElementById('userAvatar');
+                if (userAvatar && currentUser.username) {
+                    userAvatar.textContent = currentUser.username.charAt(0).toUpperCase();
+                }
+                
+                // 添加"我的图片"按钮（所有用户都有）
+                let myImagesBtn = document.getElementById('myImagesBtn');
+                if (!myImagesBtn) {
+                    myImagesBtn = document.createElement('button');
+                    myImagesBtn.id = 'myImagesBtn';
+                    myImagesBtn.className = 'nav-btn secondary';
+                    myImagesBtn.innerHTML = '📷 我的图片';
+                    myImagesBtn.style.marginRight = '8px';
+                    myImagesBtn.onclick = () => window.location.href = '/my-images.html';
+                    userInfo.insertBefore(myImagesBtn, logoutBtn);
+                }
+                
+                // 如果是管理员，添加管理后台按钮
+                if (currentUser.role === 'ADMIN') {
+                    let adminBtn = document.getElementById('adminBtn');
+                    if (!adminBtn) {
+                        adminBtn = document.createElement('button');
+                        adminBtn.id = 'adminBtn';
+                        adminBtn.className = 'nav-btn primary';
+                        adminBtn.innerHTML = '⚙️ 管理后台';
+                        adminBtn.style.marginRight = '8px';
+                        adminBtn.onclick = () => window.location.href = '/admin.html';
+                        userInfo.insertBefore(adminBtn, logoutBtn);
+                    }
+                } else {
+                    // 移除管理员按钮（如果存在）
+                    const adminBtn = document.getElementById('adminBtn');
+                    if (adminBtn) {
+                        adminBtn.remove();
+                    }
+                }
+            } else {
+                userInfo.style.display = 'none';
+                loginButtons.style.display = 'flex';
+                
+                // 移除所有用户相关的按钮
+                const adminBtn = document.getElementById('adminBtn');
+                const myImagesBtn = document.getElementById('myImagesBtn');
+                if (adminBtn) {
+                    adminBtn.remove();
+                }
+                if (myImagesBtn) {
+                    myImagesBtn.remove();
+                }
+            }
+        }
+        
+        // 模态框控制
+        function openModal(modal) {
+            modal.style.display = 'block';
+        }
+        
+        function closeModal(modal) {
+            modal.style.display = 'none';
+        }
+        
+        // 事件监听器
+        loginBtn.addEventListener('click', () => openModal(loginModal));
+        registerBtn.addEventListener('click', () => openModal(registerModal));
+        loginClose.addEventListener('click', () => closeModal(loginModal));
+        registerClose.addEventListener('click', () => closeModal(registerModal));
+        
+        // 点击模态框外部关闭
+        window.addEventListener('click', (e) => {
+            if (e.target === loginModal) closeModal(loginModal);
+            if (e.target === registerModal) closeModal(registerModal);
+        });
+        
+        // 登录表单提交
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    authToken = data.token;
+                    localStorage.setItem('authToken', authToken);
+                    currentUser = data.user;
+                    updateUserUI();
+                    closeModal(loginModal);
+                    showMessage('登录成功！', 'success');
+                    loginForm.reset();
+                    
+                    // 如果是管理员，跳转到管理页面
+                    if (data.user.role === 'ADMIN') {
+                        setTimeout(() => {
+                            window.location.href = '/admin.html';
+                        }, 1000);
+                    }
+                } else {
+                    showModalMessage('loginModal', data.message || '登录失败', 'error');
+                }
+            } catch (error) {
+                showModalMessage('loginModal', '网络错误，请稍后重试', 'error');
+            }
+        });
+        
+        // 注册表单提交
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    closeModal(registerModal);
+                    showMessage('注册成功！请登录', 'success');
+                    registerForm.reset();
+                    setTimeout(() => openModal(loginModal), 1000);
+                } else {
+                    // 处理详细的验证错误信息
+                    let errorMessage = data.message || '注册失败';
+                    
+                    // 如果是验证错误，显示具体的验证信息
+                    if (data.validation && data.validation.length > 0) {
+                        const validationErrors = data.validation.map(err => {
+                            const field = err.instancePath.replace('/', '');
+                            const fieldNames = {
+                                'username': '用户名',
+                                'email': '邮箱',
+                                'password': '密码'
+                            };
+                            const fieldName = fieldNames[field] || field;
+                            let message = err.message;
+                            // 翻译常见的验证错误消息
+                            if (message.includes('must NOT have fewer than')) {
+                                const match = message.match(/(\d+)/);
+                                const minLength = match ? match[1] : '6';
+                                message = `至少需要${minLength}个字符`;
+                            }
+                            return `${fieldName}${message}`;
+                        }).join('<br>');
+                        errorMessage = validationErrors;
+                    }
+                    
+                    showModalMessage('registerModal', errorMessage, 'error');
+                }
+            } catch (error) {
+                showModalMessage('registerModal', '网络错误，请稍后重试', 'error');
+            }
+        });
+        
+        // 登出
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+            } catch (error) {
+                // 忽略登出错误
+            }
+            
+            localStorage.removeItem('authToken');
+            authToken = null;
+            currentUser = null;
+            updateUserUI();
+            showMessage('已登出', 'info');
+        });
+        
+        // 页面加载时检查登录状态
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuthStatus();
+            initTheme();
+        });
+        
+        // 主题切换功能
+        function initTheme() {
+            const themeToggle = document.getElementById('themeToggle');
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            
+            // 应用保存的主题
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+                themeToggle.textContent = '☀️';
+            } else {
+                themeToggle.textContent = '🌙';
+            }
+            
+            // 主题切换事件
+            themeToggle.addEventListener('click', () => {
+                const isDark = document.body.classList.contains('dark-theme');
+                
+                if (isDark) {
+                    document.body.classList.remove('dark-theme');
+                    themeToggle.textContent = '🌙';
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    document.body.classList.add('dark-theme');
+                    themeToggle.textContent = '☀️';
+                    localStorage.setItem('theme', 'dark');
+                }
+            });
+        }
+        
+        // 文件选择
+        uploadBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        uploadZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        // 拖拽上传
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+        
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files);
+            handleFiles(files);
+        });
+        
+        // 文件选择处理
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            handleFiles(files);
+        });
+        
+        // 清除按钮
+        clearBtn.addEventListener('click', () => {
+            fileInput.value = '';
+            messageArea.innerHTML = '';
+            resultArea.style.display = 'none';
+            progressBar.style.display = 'none';
+        });
+
+        // 剪贴板粘贴功能
+        document.addEventListener('paste', (e) => {
+            const items = Array.from(e.clipboardData.items);
+            const files = [];
+            
+            for (const item of items) {
+                // 检查是否为图片类型
+                if (item.type.indexOf('image') !== -1) {
+                    const file = item.getAsFile();
+                    if (file) {
+                        // 给粘贴的文件一个默认名称
+                        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                        const extension = file.type.split('/')[1] || 'png';
+                        const newFile = new File([file], `paste-${timestamp}.${extension}`, {
+                            type: file.type
+                        });
+                        files.push(newFile);
+                    }
+                }
+            }
+            
+            if (files.length > 0) {
+                e.preventDefault();
+                showMessage('检测到剪贴板图片，开始上传...', 'info');
+                handleFiles(files);
+            }
+        });
+
+        // 处理文件上传
+        async function handleFiles(files) {
+            if (!files.length) return;
+            
+            // 检查是否需要登录
+            if (!authToken) {
+                showMessage('请先登录后再上传图片', 'error');
+                setTimeout(() => openModal(loginModal), 1000);
+                return;
+            }
+            
+            // 验证文件
+            const validFiles = files.filter(file => {
+                if (!file.type.startsWith('image/')) {
+                    showMessage(`${file.name} 不是有效的图片文件`, 'error');
+                    return false;
+                }
+                if (file.size > 10 * 1024 * 1024) { // 10MB
+                    showMessage(`${file.name} 文件过大，最大支持10MB`, 'error');
+                    return false;
+                }
+                return true;
+            });
+            
+            if (!validFiles.length) return;
+            
+            try {
+                progressBar.style.display = 'block';
+                progressFill.style.width = '0%';
+                
+                const formData = new FormData();
+                validFiles.forEach(file => {
+                    formData.append('files', file);
+                });
+                
+                const xhr = new XMLHttpRequest();
+                
+                // 上传进度
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const percent = (e.loaded / e.total) * 100;
+                        progressFill.style.width = percent + '%';
+                    }
+                });
+                
+                xhr.onload = function() {
+                    progressBar.style.display = 'none';
+                    
+                    console.log('XHR status:', xhr.status);
+                    console.log('XHR response:', xhr.responseText);
+                    
+                    if (xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        console.log('Upload response:', response);
+                        if (response.success) {
+                            showMessage(response.message, 'success');
+                            // 修复数据结构 - 服务器返回的图片数据在 data 字段中
+                            const images = response.data ? [response.data] : (response.images || [response.image]);
+                            console.log('Images to display:', images);
+                            if (images && images.length > 0 && images[0]) {
+                                console.log('Calling displayResults with:', images);
+                                displayResults(images);
+                            } else {
+                                console.log('No valid images to display');
+                            }
+                        } else {
+                            showMessage(response.message, 'error');
+                        }
+                    } else if (xhr.status === 401) {
+                        showMessage('登录已过期，请重新登录', 'error');
+                        localStorage.removeItem('authToken');
+                        authToken = null;
+                        currentUser = null;
+                        updateUserUI();
+                        setTimeout(() => openModal(loginModal), 1000);
+                    } else {
+                        showMessage('上传失败，请稍后重试', 'error');
+                    }
+                };
+                
+                xhr.onerror = function() {
+                    progressBar.style.display = 'none';
+                    showMessage('网络错误，上传失败', 'error');
+                };
+                
+                const endpoint = validFiles.length === 1 ? '/api/upload/single' : '/api/upload/multiple';
+                xhr.open('POST', endpoint);
+                
+                // 添加认证头
+                if (authToken) {
+                    xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
+                }
+                
+                xhr.send(formData);
+                
+            } catch (error) {
+                progressBar.style.display = 'none';
+                showMessage('上传失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 显示消息
+        // 在模态框内显示消息
+        function showModalMessage(modalId, message, type = 'info') {
+            const messageDiv = document.querySelector(`#${modalId} [id$="Message"]`);
+            if (!messageDiv) return;
+            
+            let className = 'info-message';
+            if (type === 'error') className = 'error-message';
+            if (type === 'success') className = 'success-message';
+            
+            messageDiv.innerHTML = `<div class="${className}" style="margin: 10px 0; padding: 10px; border-radius: 4px;">${message}</div>`;
+            messageDiv.style.display = 'block';
+            
+            // 自动隐藏成功和信息消息
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    messageDiv.innerHTML = '';
+                    messageDiv.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        function showMessage(message, type = 'info') {
+            let className = 'info-message';
+            if (type === 'error') className = 'error-message';
+            if (type === 'success') className = 'success-message';
+            
+            messageArea.innerHTML = `<div class="${className}">${message}</div>`;
+            
+            // 自动隐藏成功和信息消息
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    messageArea.innerHTML = '';
+                }, 3000);
+            }
+        }
+        
+        // 显示上传结果
+        function displayResults(images) {
+            console.log('displayResults called with:', images);
+            if (!images || !images.length) {
+                console.log('No images to display');
+                return;
+            }
+            
+            console.log('Clearing result list and showing result area');
+            resultList.innerHTML = '';
+            
+            images.forEach((image, index) => {
+                console.log(`Processing image ${index}:`, image);
+                const fullUrl = window.location.origin + image.url;
+                // 修复文件名获取 - 服务器返回的是 filename 字段
+                const fileName = image.filename || image.originalName || '图片.png';
+                console.log(`Full URL: ${fullUrl}, File name: ${fileName}`);
+                
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                
+                resultItem.innerHTML = `
+                    <img src="${image.url}" alt="${fileName}" class="result-thumbnail">
+                    <div class="result-info">
+                        <div class="result-name">${fileName}</div>
+                        <div class="link-formats">
+                            <div class="format-group">
+                                <div class="format-label">URL</div>
+                                <div class="format-input">
+                                    <input type="text" class="format-text" value="${fullUrl}" readonly>
+                                    <button class="format-copy-btn" onclick="copyToClipboard(\`${fullUrl}\`, 'URL')">复制</button>
+                                </div>
+                            </div>
+                            <div class="format-group">
+                                <div class="format-label">HTML</div>
+                                <div class="format-input">
+                                    <input type="text" class="format-text" value='&lt;img src="${fullUrl}" alt="${fileName}" /&gt;' readonly>
+                                    <button class="format-copy-btn" onclick="copyToClipboard(\`<img src=&quot;${fullUrl}&quot; alt=&quot;${fileName}&quot; />\`, 'HTML')">复制</button>
+                                </div>
+                            </div>
+                            <div class="format-group">
+                                <div class="format-label">MarkDown</div>
+                                <div class="format-input">
+                                    <input type="text" class="format-text" value="![${fileName}](${fullUrl})" readonly>
+                                    <button class="format-copy-btn" onclick="copyToClipboard(\`![${fileName}](${fullUrl})\`, 'MarkDown')">复制</button>
+                                </div>
+                            </div>
+                            <div class="format-group">
+                                <div class="format-label">BBCode</div>
+                                <div class="format-input">
+                                    <input type="text" class="format-text" value="[img]${fullUrl}[/img]" readonly>
+                                    <button class="format-copy-btn" onclick="copyToClipboard(\`[img]${fullUrl}[/img]\`, 'BBCode')">复制</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                resultList.appendChild(resultItem);
+            });
+            
+            resultArea.style.display = 'block';
+        }
+        
+        // 复制到剪贴板
+        function copyToClipboard(text, type = '链接') {
+            navigator.clipboard.writeText(text).then(() => {
+                showMessage(`${type}已复制到剪贴板`, 'success');
+            }).catch(() => {
+                // 备选方案
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showMessage(`${type}已复制到剪贴板`, 'success');
+            });
+        }
+    </script>
+</body>
+</html>

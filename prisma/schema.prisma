@@ -1,0 +1,107 @@
+// Prisma Schema - ZeroU图床项目
+// 使用SQLite数据库，兼容性最佳
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./database/app.db"
+}
+
+// 用户表
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  email     String   @unique
+  password  String   // bcrypt加密
+  role      String   @default("USER")  // USER | ADMIN
+  isActive  Boolean  @default(true)
+  avatar    String?  // 头像URL (可选)
+  
+  // 时间戳
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // 关联关系
+  images    Image[]
+  operationLogs OperationLog[]
+  
+  @@map("users")
+}
+
+// 图片表
+model Image {
+  id            String   @id  // 使用nanoid生成
+  filename      String   // 存储的文件名
+  originalName  String   // 原始文件名
+  path          String   // 文件系统路径
+  url           String   // 访问URL
+  
+  // 文件信息
+  mimetype      String   // MIME类型
+  size          Int      // 文件大小(字节)
+  width         Int?     // 图片宽度
+  height        Int?     // 图片高度
+  
+  // 业务字段
+  // 移除status字段，直接物理删除
+  downloadCount Int      @default(0)  // 下载次数
+  viewCount     Int      @default(0)  // 查看次数
+  description   String?  // 图片描述(可选)
+  tags          String?  // 标签，JSON字符串存储
+  
+  // 时间戳
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // 外键关系
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // 索引
+  @@index([userId])
+  @@index([createdAt])
+  @@map("images")
+}
+
+// 系统配置表
+model Config {
+  id          String   @id @default(cuid())
+  key         String   @unique  // 配置键
+  value       String   // 配置值
+  type        String   @default("string")  // string | number | boolean | json
+  description String?  // 配置说明
+  category    String   @default("general")  // 配置分类
+  
+  // 时间戳
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("configs")
+}
+
+// 操作日志表
+model OperationLog {
+  id          String   @id @default(cuid())
+  action      String   // 操作类型: upload, delete, block, etc.
+  resource    String   // 资源类型: image, user, config
+  resourceId  String   // 资源ID
+  details     String?  // 操作详情(JSON)
+  ipAddress   String?  // IP地址
+  userAgent   String?  // 用户代理
+  
+  // 时间戳
+  createdAt   DateTime @default(now())
+  
+  // 外键关系
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  // 索引
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("operation_logs")
+}

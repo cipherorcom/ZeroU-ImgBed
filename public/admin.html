@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroU图床 - 管理后台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+        
+        /* 深色主题 */
+        body.dark-theme {
+            background: #1a1a2e;
+            color: #e0e0e0;
+        }
+        
+        body.dark-theme .admin-header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+        
+        body.dark-theme .admin-container {
+            background: transparent;
+        }
+        
+        body.dark-theme .tab-content {
+            background: rgba(255, 255, 255, 0.1);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #e0e0e0;
+        }
+        
+        body.dark-theme .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #e0e0e0;
+        }
+        
+        body.dark-theme .admin-table {
+            background: rgba(255, 255, 255, 0.1);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        
+        body.dark-theme .admin-table th {
+            background: rgba(255, 255, 255, 0.15);
+            color: #e0e0e0;
+        }
+        
+        body.dark-theme .admin-table td {
+            color: #e0e0e0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        body.dark-theme .btn-secondary {
+            background: rgba(255, 255, 255, 0.15);
+            color: #e0e0e0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        body.dark-theme .dashboard-header h2 {
+            color: #e0e0e0;
+        }
+        
+        body.dark-theme .btn-warning {
+            color: #333;
+        }
+        
+        body.dark-theme .data-table {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        
+        body.dark-theme .data-table th {
+            background: rgba(255, 255, 255, 0.15);
+            color: #e0e0e0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        body.dark-theme .data-table td {
+            color: #e0e0e0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .empty-data {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        
+        body.dark-theme .empty-data {
+            color: #999;
+        }
+        
+        body.dark-theme .loading {
+            color: #999;
+        }
+        
+        .management-section {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        body.dark-theme .management-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        
+        .management-title {
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+        
+        body.dark-theme .management-title {
+            color: #8b9fee;
+        }
+
+        body.dark-theme .admin-tabs {
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        body.dark-theme .tab-button {
+            color: #b0b0b0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px 8px 0 0;
+            margin-bottom: -2px;
+        }
+        
+        body.dark-theme .tab-button:hover {
+            color: #e0e0e0;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        body.dark-theme .tab-button.active {
+            color: #a78bfa;
+            border-bottom-color: #a78bfa;
+            background: rgba(167, 139, 250, 0.1);
+        }
+        
+        /* 主题切换按钮 */
+        .theme-toggle {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px) rotate(180deg);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .admin-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .admin-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .admin-container {
+            max-width: 1600px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .admin-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .tab-button {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        body.dark-theme .stat-label {
+            color: #e0e0e0;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+            word-wrap: break-word;
+            vertical-align: middle;
+        }
+        
+        .data-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        /* 设置各列的宽度 */
+        .data-table th:nth-child(1), .data-table td:nth-child(1) { width: 80px; text-align: center; } /* 缩略图 */
+        .data-table th:nth-child(2), .data-table td:nth-child(2) { width: 180px; } /* 文件名 */
+        .data-table th:nth-child(3), .data-table td:nth-child(3) { width: 220px; } /* 原始名称 */
+        .data-table th:nth-child(4), .data-table td:nth-child(4) { width: 80px; text-align: center; } /* 大小 */
+        .data-table th:nth-child(5), .data-table td:nth-child(5) { width: 100px; text-align: center; } /* 尺寸 */
+        .data-table th:nth-child(6), .data-table td:nth-child(6) { width: 80px; text-align: center; } /* 上传者 */
+        .data-table th:nth-child(7), .data-table td:nth-child(7) { width: 150px; } /* 上传时间 */
+        .data-table th:nth-child(8), .data-table td:nth-child(8) { width: 80px; text-align: center; } /* 下载次数 */
+        .data-table th:nth-child(9), .data-table td:nth-child(9) { width: 80px; text-align: center; } /* 状态 */
+        .data-table th:nth-child(10), .data-table td:nth-child(10) { width: 320px; } /* 操作 */
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin: 0 0.25rem;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin: 0 auto;
+        }
+        
+        .data-table td:first-child {
+            text-align: center;
+            vertical-align: middle;
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .image-thumbnail {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+            margin: 0.1rem;
+        }
+        
+        .data-table td {
+            vertical-align: middle;
+        }
+        
+        .data-table td:last-child {
+            min-width: 200px;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .dashboard-header h2 {
+            margin: 0;
+            color: #333;
+            font-size: 24px;
+        }
+        
+        .btn-refresh {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-refresh:hover {
+            background: #138496;
+        }
+    </style>
+</head>
+<body>
+    <!-- 主题切换按钮 -->
+    <button class="theme-toggle" id="themeToggle" title="切换主题">
+        🌙
+    </button>
+    
+    <div class="admin-header">
+        <div class="admin-nav">
+            <div class="admin-title">ZeroU图床管理后台</div>
+            <div class="admin-user">
+                <button class="btn" onclick="goToHomepage()" style="background: #28a745; margin-right: 1rem;">返回前台</button>
+                <div class="user-avatar" id="adminAvatar">A</div>
+                <span id="adminUsername">管理员</span>
+                <button class="btn" onclick="logout()">登出</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-container">
+        <div class="admin-tabs">
+            <button class="tab-button active" onclick="showTab('dashboard')">仪表板</button>
+            <button class="tab-button" onclick="showTab('users')">用户管理</button>
+            <button class="tab-button" onclick="showTab('images')">图片管理</button>
+            <button class="tab-button" onclick="showTab('system')">系统信息</button>
+        </div>
+
+        <!-- 仪表板 -->
+        <div id="dashboard" class="tab-content active">
+            <div class="dashboard-header">
+                <h2>系统概览</h2>
+                <button onclick="refreshStats()" class="btn btn-refresh">刷新数据</button>
+            </div>
+            <div class="stats-grid" id="statsGrid">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+
+        <!-- 用户管理 -->
+        <div id="users" class="tab-content">
+            <div class="dashboard-header">
+                <h2>用户管理</h2>
+                <div>
+                    <button onclick="showAddUserModal()" class="btn btn-success" style="margin-right: 10px;">新增用户</button>
+                    <button onclick="refreshUsers()" class="btn btn-refresh">刷新数据</button>
+                </div>
+            </div>
+            <div id="usersContent">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+
+        <!-- 图片管理 -->
+        <div id="images" class="tab-content">
+            <div class="dashboard-header">
+                <h2>图片管理</h2>
+                <button onclick="refreshImages()" class="btn btn-refresh">刷新数据</button>
+            </div>
+            <div id="imagesContent">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+
+        <!-- 系统信息 -->
+        <div id="system" class="tab-content">
+            <div class="dashboard-header">
+                <h2>系统信息</h2>
+                <button onclick="refreshSystemInfo()" class="btn btn-refresh">刷新数据</button>
+            </div>
+            <div id="systemContent">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let authToken = localStorage.getItem('authToken');
+
+        // 检查权限
+        function checkAuth() {
+            if (!authToken) {
+                alert('请先登录');
+                window.location.href = '/';
+                return false;
+            }
+            return true;
+        }
+
+        // 切换标签页
+        function showTab(tabName) {
+            // 隐藏所有标签内容
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // 显示选中的标签
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            // 加载对应的数据
+            loadTabData(tabName);
+        }
+
+        // 加载标签数据
+        function loadTabData(tabName) {
+            switch(tabName) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'users':
+                    loadUsers();
+                    break;
+                case 'images':
+                    loadImages();
+                    break;
+                case 'system':
+                    loadSystem();
+                    break;
+            }
+        }
+
+        // 加载仪表板
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/api/admin/stats', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const stats = data.stats;
+
+                    document.getElementById('statsGrid').innerHTML = `
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.userCount || 0}</div>
+                            <div class="stat-label">总用户数</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.imageCount || 0}</div>
+                            <div class="stat-label">总图片数</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${((stats.totalSize || 0) / 1024 / 1024).toFixed(2)} MB</div>
+                            <div class="stat-label">存储用量</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.todayImages || 0}</div>
+                            <div class="stat-label">今日上传</div>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('statsGrid').innerHTML = '<div class="loading">加载失败</div>';
+                }
+            } catch (error) {
+                document.getElementById('statsGrid').innerHTML = '<div class="loading">加载失败</div>';
+            }
+        }
+
+        // 加载统计数据（兼容性函数）
+        async function loadStats() {
+            await loadDashboard();
+        }
+
+        // 刷新统计数据
+        function refreshStats() {
+            loadStats()
+            showMessage('统计数据已刷新', 'success')
+        }
+
+        // 加载用户列表
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/admin/users', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const users = data.users;
+
+                    let html = `
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>头像</th>
+                                    <th>用户名</th>
+                                    <th>邮箱</th>
+                                    <th>角色</th>
+                                    <th>状态</th>
+                                    <th>注册时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    if (users.length === 0) {
+                        html += `
+                            <tr>
+                                <td colspan="7" class="empty-data">
+                                    暂无用户数据
+                                </td>
+                            </tr>
+                        `;
+                    } else {
+                        users.forEach(user => {
+                            html += `
+                                <tr>
+                                    <td>
+                                        <div class="user-avatar">
+                                            ${user.username.charAt(0).toUpperCase()}
+                                        </div>
+                                    </td>
+                                    <td>${user.username}</td>
+                                    <td>${user.email}</td>
+                                    <td>${user.role}</td>
+                                    <td>
+                                        <span class="status-badge ${user.isActive ? 'status-active' : 'status-inactive'}">
+                                            ${user.isActive ? '激活' : '禁用'}
+                                        </span>
+                                    </td>
+                                    <td>${new Date(user.createdAt).toLocaleString()}</td>
+                                    <td>
+                                        <button class="btn ${user.isActive ? 'btn-warning' : 'btn-success'}" 
+                                                onclick="toggleUserStatus('${user.id}', ${user.isActive})" style="margin-right: 5px;">
+                                            ${user.isActive ? '禁用' : '启用'}
+                                        </button>
+                                        <button class="btn btn-secondary" onclick="editUser('${user.id}')" style="margin-right: 5px;">编辑</button>
+                                        <button class="btn btn-danger" onclick="deleteUser('${user.id}', '${user.username}')">删除</button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                    }
+
+                    html += '</tbody></table>';
+                    document.getElementById('usersContent').innerHTML = html;
+                } else {
+                    document.getElementById('usersContent').innerHTML = '<div class="loading">加载失败</div>';
+                }
+            } catch (error) {
+                document.getElementById('usersContent').innerHTML = '<div class="loading">加载失败</div>';
+            }
+        }
+
+        // 切换用户状态
+        async function toggleUserStatus(userId, currentStatus) {
+            try {
+                const response = await fetch(`/api/admin/user/${userId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ isActive: !currentStatus })
+                });
+
+                if (response.ok) {
+                    loadUsers(); // 重新加载用户列表
+                } else {
+                    alert('操作失败');
+                }
+            } catch (error) {
+                alert('操作失败');
+            }
+        }
+
+        // 加载图片列表
+        async function loadImages() {
+            try {
+                const response = await fetch('/api/admin/images?page=1&limit=20', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const images = data.images || [];
+
+                    let html = `
+                        <div style="margin-bottom: 1rem;">
+                            <span>共 ${data.pagination ? data.pagination.total : (data.total || images.length)} 张图片</span>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>缩略图</th>
+                                    <th>文件名</th>
+                                    <th>原始名称</th>
+                                    <th>大小</th>
+                                    <th>尺寸</th>
+                                    <th>上传者</th>
+                                    <th>上传时间</th>
+                                    <th>下载次数</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    if (images.length === 0) {
+                        html += `
+                            <tr>
+                                <td colspan="10" class="empty-data">
+                                    暂无图片数据
+                                </td>
+                            </tr>
+                        `;
+                    } else {
+                        images.forEach(image => {
+                            const sizeInKB = (image.size / 1024).toFixed(2);
+                            const dimensions = image.width && image.height ? `${image.width}×${image.height}` : '未知';
+                            
+                            html += `
+                                <tr>
+                                    <td>
+                                        <img src="/image/${image.id}?w=60&h=60" alt="${image.filename}" class="image-thumbnail" 
+                                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjZjVmNWY1Ii8+CjxwYXRoIGQ9Ik0yMCAyMEg0MFY0MEgyMFYyMFoiIGZpbGw9IiNkZGQiLz4KPC9zdmc+'">
+                                    </td>
+                                    <td>${image.filename}</td>
+                                    <td>${image.originalName}</td>
+                                    <td>${sizeInKB} KB</td>
+                                    <td>${dimensions}</td>
+                                    <td>${image.user ? image.user.username : '游客'}</td>
+                                    <td>${new Date(image.createdAt).toLocaleString()}</td>
+                                    <td>${image.downloadCount || 0}</td>
+                                    <td>
+                                        <span class="status-badge status-active">正常</span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm" onclick="viewImage('/image/${image.id}')">查看</button>
+                                        <button class="btn btn-sm" onclick="copyImageUrl('${window.location.origin}/image/${image.id}')">复制链接</button>
+                                        <button class="btn btn-danger btn-sm" onclick="deleteImage('${image.id}')">删除</button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                    }
+
+                    html += '</tbody></table>';
+                    document.getElementById('imagesContent').innerHTML = html;
+                } else {
+                    document.getElementById('imagesContent').innerHTML = '<div class="loading">加载失败</div>';
+                }
+            } catch (error) {
+                document.getElementById('imagesContent').innerHTML = '<div class="loading">网络错误</div>';
+            }
+        }
+
+        // 加载系统信息
+        async function loadSystem() {
+            try {
+                const [cacheResponse, memoryInfo] = await Promise.all([
+                    fetch('/api/admin/cache/stats', {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    }),
+                    // 获取内存使用情况
+                    Promise.resolve({
+                        used: Math.round(performance.memory?.usedJSHeapSize / 1024 / 1024) || 0,
+                        total: Math.round(performance.memory?.totalJSHeapSize / 1024 / 1024) || 0
+                    })
+                ]);
+
+                if (cacheResponse.ok) {
+                    const cacheData = await cacheResponse.json();
+                    
+                    document.getElementById('systemContent').innerHTML = `
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                            <div class="stat-card">
+                                <h3 style="margin-bottom: 1rem; color: #667eea;">🗄️ 缓存统计</h3>
+                                <p><strong>缓存项数量:</strong> ${cacheData.stats.size || 0}</p>
+                                <p><strong>定时器数量:</strong> ${cacheData.stats.timers || 0}</p>
+                                <button class="btn btn-warning" onclick="clearCache()" style="margin-top: 1rem;">清理缓存</button>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <h3 style="margin-bottom: 1rem; color: #667eea;">💾 内存使用</h3>
+                                <p><strong>已使用:</strong> ${memoryInfo.used} MB</p>
+                                <p><strong>总分配:</strong> ${memoryInfo.total} MB</p>
+                                <p><strong>使用率:</strong> ${memoryInfo.total > 0 ? ((memoryInfo.used / memoryInfo.total) * 100).toFixed(1) : 0}%</p>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <h3 style="margin-bottom: 1rem; color: #667eea;">🌐 系统信息</h3>
+                                <p><strong>用户代理:</strong> ${navigator.userAgent.split(' ')[0]}</p>
+                                <p><strong>平台:</strong> ${navigator.platform}</p>
+                                <p><strong>语言:</strong> ${navigator.language}</p>
+                                <p><strong>在线状态:</strong> ${navigator.onLine ? '在线' : '离线'}</p>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <h3 style="margin-bottom: 1rem; color: #667eea;">⚡ 性能指标</h3>
+                                <p><strong>页面加载时间:</strong> ${Math.round(performance.now())} ms</p>
+                                <p><strong>DOM 准备时间:</strong> ${document.readyState}</p>
+                                <p><strong>连接类型:</strong> ${navigator.connection?.effectiveType || '未知'}</p>
+                                <button class="btn" onclick="location.reload()" style="margin-top: 1rem;">刷新页面</button>
+                            </div>
+                        </div>
+                        
+                        <div class="management-section">
+                            <h3 class="management-title">🛠️ 管理操作</h3>
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <button class="btn" onclick="downloadLogs()">下载日志</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('systemContent').innerHTML = '<div class="loading">加载失败</div>';
+                }
+            } catch (error) {
+                document.getElementById('systemContent').innerHTML = '<div class="loading">加载失败</div>';
+            }
+        }
+        
+        // 下载日志功能
+        function downloadLogs() {
+            alert('日志下载功能开发中...');
+        }
+
+        // 清理缓存
+        async function clearCache() {
+            try {
+                const response = await fetch('/api/admin/cache', {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    alert('缓存清理成功');
+                    loadSystem();
+                } else {
+                    alert('清理失败');
+                }
+            } catch (error) {
+                alert('清理失败');
+            }
+        }
+
+        // 图片管理相关函数
+        function viewImage(url) {
+            window.open(url, '_blank');
+        }
+
+        function copyImageUrl(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                alert('图片链接已复制到剪贴板');
+            }).catch(() => {
+                // 备选方案
+                const textarea = document.createElement('textarea');
+                textarea.value = url;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('图片链接已复制到剪贴板');
+            });
+        }
+
+        async function deleteImage(imageId) {
+            if (!confirm('确定要删除这张图片吗？此操作不可恢复！')) return;
+            
+            try {
+                const response = await fetch(`/api/admin/images/${imageId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    alert('图片已删除');
+                    loadImages();
+                } else {
+                    alert('删除失败');
+                }
+            } catch (error) {
+                alert('删除失败');
+            }
+        }
+
+        // 登出
+        function logout() {
+            localStorage.removeItem('authToken');
+            window.location.href = '/';
+        }
+        
+        // 返回前台首页
+        function goToHomepage() {
+            window.location.href = '/';
+        }
+
+        // 主题切换功能
+        function initTheme() {
+            const themeToggle = document.getElementById('themeToggle');
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            
+            // 应用保存的主题
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+                themeToggle.textContent = '☀️';
+            } else {
+                themeToggle.textContent = '🌙';
+            }
+            
+            // 主题切换事件
+            themeToggle.addEventListener('click', () => {
+                const isDark = document.body.classList.contains('dark-theme');
+                
+                if (isDark) {
+                    document.body.classList.remove('dark-theme');
+                    themeToggle.textContent = '🌙';
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    document.body.classList.add('dark-theme');
+                    themeToggle.textContent = '☀️';
+                    localStorage.setItem('theme', 'dark');
+                }
+            });
+        }
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!checkAuth()) return;
+            
+            // 初始化主题
+            initTheme();
+            
+            // 获取用户信息
+            fetch('/api/auth/me', {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            }).then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('认证失败');
+                }
+            }).then(data => {
+                document.getElementById('adminUsername').textContent = data.user.username;
+                document.getElementById('adminAvatar').textContent = data.user.username.charAt(0).toUpperCase();
+                if (data.user.role !== 'ADMIN') {
+                    alert('您没有管理员权限');
+                    window.location.href = '/';
+                }
+            }).catch(() => {
+                alert('认证失败，请重新登录');
+                window.location.href = '/';
+            });
+
+            // 加载仪表板数据
+            loadDashboard();
+        });
+
+        // 刷新图片列表
+        function refreshImages() {
+            loadImages()
+            showMessage('图片列表已刷新', 'success')
+        }
+        
+        // 刷新用户列表
+        function refreshUsers() {
+            loadUsers()
+            showMessage('用户列表已刷新', 'success')
+        }
+        
+        // 刷新系统信息
+        function refreshSystemInfo() {
+            loadSystem()
+            showMessage('系统信息已刷新', 'success')
+        }
+        
+        // 显示消息提示
+        function showMessage(message, type) {
+            // 简单的消息提示实现
+            const messageDiv = document.createElement('div')
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                border-radius: 4px;
+                color: white;
+                font-weight: 500;
+                z-index: 9999;
+                background: ${type === 'success' ? '#28a745' : '#dc3545'};
+            `
+            messageDiv.textContent = message
+            document.body.appendChild(messageDiv)
+            
+            setTimeout(() => {
+                document.body.removeChild(messageDiv)
+            }, 3000)
+        }
+
+        // 用户管理相关函数
+        let currentEditingUserId = null;
+
+        function showAddUserModal() {
+            currentEditingUserId = null;
+            document.getElementById('userModalTitle').textContent = '新增用户';
+            document.getElementById('userForm').reset();
+            document.getElementById('password').required = true;
+            document.getElementById('userModal').style.display = 'flex';
+        }
+
+        function editUser(userId) {
+            currentEditingUserId = userId;
+            document.getElementById('userModalTitle').textContent = '编辑用户';
+            document.getElementById('password').required = false;
+            
+            // 加载用户数据并填充表单
+            loadUserForEdit(userId);
+            document.getElementById('userModal').style.display = 'flex';
+        }
+
+        async function loadUserForEdit(userId) {
+            try {
+                const response = await fetch(`/api/admin/user/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const user = data.user;
+                    
+                    document.getElementById('username').value = user.username;
+                    document.getElementById('email').value = user.email;
+                    document.getElementById('role').value = user.role;
+                    document.getElementById('password').value = ''; // 密码留空
+                } else {
+                    showMessage('加载用户信息失败', 'error');
+                }
+            } catch (error) {
+                showMessage('网络错误', 'error');
+            }
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').style.display = 'none';
+            currentEditingUserId = null;
+        }
+
+        async function deleteUser(userId, username) {
+            if (!confirm(`确定要删除用户 "${username}" 吗？此操作不可撤销！`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/user/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    showMessage('用户删除成功', 'success');
+                    loadUsers(); // 重新加载用户列表
+                } else {
+                    const data = await response.json();
+                    showMessage(data.message || '删除失败', 'error');
+                }
+            } catch (error) {
+                showMessage('网络错误', 'error');
+            }
+        }
+
+        // 处理用户表单提交
+        document.getElementById('userForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const userData = {
+                username: formData.get('username'),
+                email: formData.get('email'),
+                role: formData.get('role')
+            };
+
+            if (formData.get('password')) {
+                userData.password = formData.get('password');
+            }
+
+            try {
+                const url = currentEditingUserId 
+                    ? `/api/admin/user/${currentEditingUserId}`
+                    : '/api/admin/user';
+                
+                const method = currentEditingUserId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                if (response.ok) {
+                    showMessage(currentEditingUserId ? '用户更新成功' : '用户创建成功', 'success');
+                    closeUserModal();
+                    loadUsers(); // 重新加载用户列表
+                } else {
+                    const data = await response.json();
+                    showMessage(data.message || '操作失败', 'error');
+                }
+            } catch (error) {
+                showMessage('网络错误', 'error');
+            }
+        });
+    </script>
+
+    <!-- 用户管理模态框 -->
+    <div id="userModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeUserModal()">&times;</span>
+            <h3 id="userModalTitle">新增用户</h3>
+            <form id="userForm">
+                <div class="form-group">
+                    <label for="username">用户名:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">邮箱:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">密码:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="role">角色:</label>
+                    <select id="role" name="role" required>
+                        <option value="USER">普通用户</option>
+                        <option value="ADMIN">管理员</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" onclick="closeUserModal()" class="btn btn-secondary">取消</button>
+                    <button type="submit" class="btn btn-success">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .modal {
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        body.dark-theme .modal-content {
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #e0e0e0;
+        }
+
+        .close {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close:hover {
+            color: #666;
+        }
+
+        body.dark-theme .close {
+            color: #ccc;
+        }
+
+        body.dark-theme .close:hover {
+            color: #fff;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        body.dark-theme .form-group input,
+        body.dark-theme .form-group select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #e0e0e0;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+    </style>
+</body>
+</html>
