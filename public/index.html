@@ -1342,18 +1342,41 @@
         
         // 复制到剪贴板
         function copyToClipboard(text, type = '链接') {
-            navigator.clipboard.writeText(text).then(() => {
-                showMessage(`${type}已复制到剪贴板`, 'success');
-            }).catch(() => {
-                // 备选方案
+            // Fallback helper: works on HTTP and older browsers
+            const fallbackCopy = () => {
                 const textarea = document.createElement('textarea');
                 textarea.value = text;
+                // Avoid scrolling to bottom on iOS
+                textarea.style.position = 'fixed';
+                textarea.style.top = '-1000px';
+                textarea.style.left = '-1000px';
+                textarea.setAttribute('readonly', '');
                 document.body.appendChild(textarea);
                 textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                showMessage(`${type}已复制到剪贴板`, 'success');
-            });
+                try {
+                    document.execCommand('copy');
+                    showMessage(`${type}已复制到剪贴板`, 'success');
+                } catch (err) {
+                    showMessage(`复制失败：请手动复制`, 'error');
+                } finally {
+                    document.body.removeChild(textarea);
+                }
+            };
+
+            // Use modern API only when available AND in a secure context (HTTPS or localhost)
+            if (window.isSecureContext && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+                navigator.clipboard.writeText(text)
+                    .then(() => {
+                        showMessage(`${type}已复制到剪贴板`, 'success');
+                    })
+                    .catch(() => {
+                        // Some browsers may still block; try fallback
+                        fallbackCopy();
+                    });
+            } else {
+                // navigator.clipboard 不可用（多为 HTTP 场景）
+                fallbackCopy();
+            }
         }
     </script>
 </body>
