@@ -1110,29 +1110,44 @@
             progressBar.style.display = 'none';
         });
 
-        // 剪贴板粘贴功能
+        // 剪贴板粘贴功能（更兼容的实现）
         document.addEventListener('paste', (e) => {
-            const items = Array.from(e.clipboardData.items);
+            const cd = e.clipboardData || window.clipboardData;
+            if (!cd) return; // 无法获取剪贴板数据，直接忽略
+
             const files = [];
-            
-            for (const item of items) {
-                // 检查是否为图片类型
-                if (item.type.indexOf('image') !== -1) {
-                    const file = item.getAsFile();
-                    if (file) {
-                        // 给粘贴的文件一个默认名称
+
+            // 1) 首选 items（Chrome/Edge/Safari）
+            if (cd.items && cd.items.length) {
+                for (const item of cd.items) {
+                    if ((item.kind === 'file' || !item.kind) && item.type && item.type.indexOf('image') === 0) {
+                        const file = item.getAsFile && item.getAsFile();
+                        if (file) {
+                            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                            const extension = (file.type && file.type.split('/')[1]) || 'png';
+                            const newFile = new File([file], `paste-${timestamp}.${extension}`, { type: file.type || 'image/png' });
+                            files.push(newFile);
+                        }
+                    }
+                }
+            }
+
+            // 2) Firefox 等浏览器常见：只在 files 中暴露
+            if (!files.length && cd.files && cd.files.length) {
+                for (const f of cd.files) {
+                    if (f && f.type && f.type.indexOf('image') === 0) {
                         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-                        const extension = file.type.split('/')[1] || 'png';
-                        const newFile = new File([file], `paste-${timestamp}.${extension}`, {
-                            type: file.type
-                        });
+                        const extension = (f.type && f.type.split('/')[1]) || 'png';
+                        const newFile = new File([f], `paste-${timestamp}.${extension}`, { type: f.type || 'image/png' });
                         files.push(newFile);
                     }
                 }
             }
-            
+
             if (files.length > 0) {
+                // 阻止默认粘贴到输入框/内容区
                 e.preventDefault();
+                e.stopPropagation();
                 showMessage('检测到剪贴板图片，开始上传...', 'info');
                 handleFiles(files);
             }
