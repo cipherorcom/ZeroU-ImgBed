@@ -15,6 +15,6 @@ services:
       # 可选: 如果你的域名使用了CDN，在这里配置CDN域名
       # - CDN_URL=https://cdn.your-domain.com
     volumes:
-      - ./uploads:/app/uploads
-      - ./database:/app/database
+      - ./uploads:/app/uploads:rw
+      - ./database:/app/database:rw
     restart: unless-stopped

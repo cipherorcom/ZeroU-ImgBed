@@ -47,9 +47,8 @@ fi
 echo "📦 拉取最新镜像..."
 docker pull "$IMAGE_NAME"
 
-echo "🗂️  创建数据卷..."
-docker volume create "${CONTAINER_NAME}_uploads" 2>/dev/null || true
-docker volume create "${CONTAINER_NAME}_db" 2>/dev/null || true
+echo "🗂️  创建本地目录..."
+mkdir -p ./uploads ./database
 
 echo "🚀 启动容器..."
 docker run -d \
@@ -61,8 +60,8 @@ docker run -d \
   -e ADMIN_USERNAME="$ADMIN_USERNAME" \
   -e ADMIN_PASSWORD="$ADMIN_PASSWORD" \
   -e ADMIN_EMAIL="$ADMIN_EMAIL" \
-  -v "${CONTAINER_NAME}_uploads:/app/uploads" \
-  -v "${CONTAINER_NAME}_db:/app/database" \
+  -v "$(pwd)/uploads:/app/uploads" \
+  -v "$(pwd)/database:/app/database" \
   --restart unless-stopped \
   "$IMAGE_NAME"
 

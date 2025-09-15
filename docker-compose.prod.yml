@@ -14,8 +14,8 @@ services:
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
       - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
     volumes:
-      - uploads:/app/uploads
-      - db:/app/database
+      - ./uploads:/app/uploads
+      - ./database:/app/database
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
@@ -31,9 +31,3 @@ services:
         reservations:
           memory: 256M
           cpus: '0.25'
-
-volumes:
-  uploads:
-    driver: local
-  db:
-    driver: local

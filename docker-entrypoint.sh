@@ -5,6 +5,7 @@ echo "🔧 初始化数据库..."
 
 # 确保数据库目录存在
 mkdir -p /app/database
+chmod 755 /app/database
 
 # 检查数据库是否需要初始化
 DB_FILE="/app/database/app.db"
@@ -18,6 +19,12 @@ elif [ ! -s "$DB_FILE" ]; then
     rm -f "$DB_FILE"
     NEEDS_INIT=true
 else
+    # 检查数据库权限
+    if [ ! -r "$DB_FILE" ] || [ ! -w "$DB_FILE" ]; then
+        echo "📄 数据库文件权限问题，修复权限"
+        chmod 644 "$DB_FILE"
+    fi
+    
     # 检查数据库是否有表
     cd /app && node -e "
     const { PrismaClient } = require('@prisma/client');
@@ -46,6 +53,12 @@ if [ "$NEEDS_INIT" = true ]; then
     
     # 运行数据库迁移
     cd /app && npx prisma migrate deploy
+    
+    # 确保数据库文件权限正确
+    if [ -f "$DB_FILE" ]; then
+        chmod 644 "$DB_FILE"
+        echo "✅ 数据库文件权限已设置"
+    fi
     
     # 生成初始管理员用户
     cd /app && node -e "

@@ -25,8 +25,10 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh && \
     npx prisma generate && \
     npm prune --production
 
-# 创建必要的目录
-RUN mkdir -p uploads database
+# 创建必要的目录并设置权限
+RUN mkdir -p uploads database && \
+    chmod -R 755 /app/uploads && \
+    chmod -R 755 /app/database
 
 EXPOSE 3000
 
