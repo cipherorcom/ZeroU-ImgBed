@@ -6,8 +6,9 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgresql://postgres:password@db:5432/imgbed?schema=public
+      - NODE_ENV=development
+      - PORT=3000
+      - DATABASE_URL=file:./database/app.db
       - JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
       - ADMIN_USERNAME=admin
       - ADMIN_PASSWORD=admin123
@@ -15,31 +16,5 @@ services:
       # - CDN_URL=https://cdn.your-domain.com
     volumes:
       - ./uploads:/app/uploads
-      - ./logs:/app/logs
-    depends_on:
-      - db
+      - ./database:/app/database
     restart: unless-stopped
-
-  db:
-    image: postgres:15-alpine
-    environment:
-      - POSTGRES_DB=imgbed
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
-
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./uploads:/usr/share/nginx/html/uploads
-    depends_on:
-      - app
-    restart: unless-stopped
-
-volumes:
-  postgres_data:

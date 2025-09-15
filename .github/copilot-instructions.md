@@ -1,54 +1,32 @@
-<!-- Use this file to provide workspace-specific custom instructions to Copilot. For more details, visit https://code.visualstudio.com/docs/copilot/copilot-customization#_use-a-githubcopilotinstructionsmd-file -->
-- [x] Verify that the copilot-instructions.md file in the .github directory is created. ✓ Created
+# ZeroU图床项目 - Copilot 指令
 
-- [x] Clarify Project Requirements ✓ Node.js + Fastify ZeroU图床项目
-	<!-- Ask for project type, language, and frameworks if not specified. Skip if already provided. -->
+## 项目概述
+基于 Node.js + Fastify 的现代化图床系统，支持用户认证、文件上传、图片管理等功能。
 
-- [x] Scaffold the Project ✓ 项目脚手架已完成
-	<!--
-	Ensure that the previous step has been marked as completed.
-	Call project setup tool with projectType parameter.
-	Run scaffolding command to create project files and folders.
-	Use '.' as the working directory.
-	If no appropriate projectType is available, search documentation using available tools.
-	Otherwise, create the project structure manually using available file creation tools.
-	-->
+## 技术栈
+- **后端**: Node.js 18+ + Fastify 4.x
+- **数据库**: SQLite + Prisma ORM
+- **认证**: JWT + bcryptjs
+- **文件处理**: Sharp + Multer
+- **部署**: Docker + Docker Compose
 
-- [x] Customize the Project ✓ 已完成功能模块定制
-	<!--
-	Verify that all previous steps have been completed successfully and you have marked the step as completed.
-	Develop a plan to modify codebase according to user requirements.
-	Apply modifications using appropriate tools and user-provided references.
-	Skip this step for "Hello World" projects.
-	-->
+## 核心功能
+- ✅ 用户注册登录系统
+- ✅ 文件上传与管理
+- ✅ 游客上传功能
+- ✅ 限流保护机制
+- ✅ 环境变量配置
+- ✅ Docker 容器化部署
 
-- [x] Install Required Extensions ✓ 无需安装额外扩展
-	<!-- ONLY install extensions provided mentioned in the get_project_setup_info. Skip this step otherwise and mark as completed. -->
+## 开发指南
+- 遵循 ES6+ 模块化规范
+- 使用 Fastify 插件系统
+- 实现完整的错误处理
+- 配置灵活的环境变量
+- 编写完整的测试用例
 
-- [x] Compile the Project ✓ 项目依赖安装进行中
-	<!--
-	Verify that all previous steps have been completed.
-	Install any missing dependencies.
-	Run diagnostics and resolve any issues.
-	Check for markdown files in project folder for relevant instructions on how to do this.
-	-->
-
-- [x] Create and Run Task ✓ 已创建安装依赖任务
-	<!--
-	Verify that all previous steps has been completed.
-	Check https://code.visualstudio.com/docs/editor/tasks to determine if the project needs a task. If so, use the create_and_run_task to create and launch a task based on package.json, README.md, and project structure.
-	Skip this step otherwise.
-	 -->
-
-- [x] Launch the Project ✓ 项目已准备完毕，可使用 npm run dev 启动
-	<!--
-	Verify that all previous steps have been completed.
-	Prompt user for debug mode, launch only if confirmed.
-	 -->
-
-- [x] Ensure Documentation is Complete ✓ 文档已完成
-	<!--
-	Verify that all previous steps have been completed.
-	Verify that README.md and the copilot-instructions.md file in the .github directory exists and contains current project information.
-	Clean up the copilot-instructions.md file in the .github directory by removing all HTML comments.
-	 -->
+## 代码风格
+- 使用 async/await 处理异步操作
+- 保持代码简洁和可读性
+- 添加适当的日志记录
+- 实现安全最佳实践

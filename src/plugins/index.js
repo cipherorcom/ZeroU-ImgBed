@@ -3,6 +3,7 @@ import staticFiles from '@fastify/static'
 import cors from '@fastify/cors'
 import jwt from '@fastify/jwt'
 import cookie from '@fastify/cookie'
+import rateLimit from '@fastify/rate-limit'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { config } from '../config/index.js'
@@ -11,6 +12,22 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
 export async function registerPlugins(fastify) {
+  // 限流配置 - 优先注册
+  if (config.security.enableRateLimit) {
+    await fastify.register(rateLimit, {
+      max: config.security.rateLimitMax,
+      timeWindow: config.security.rateLimitWindow,
+      errorResponseBuilder: function (request, context) {
+        return {
+          error: 'RATE_LIMIT_EXCEEDED',
+          message: `请求过于频繁，请在 ${Math.ceil(context.ttl / 1000)} 秒后重试`,
+          retryAfter: Math.ceil(context.ttl / 1000)
+        }
+      },
+      statusCode: 429 // 设置正确的状态码
+    })
+  }
+
   // CORS配置
   await fastify.register(cors, {
     origin: true,

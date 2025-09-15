@@ -35,9 +35,7 @@ export const config = {
   },
   
   image: {
-    quality: parseInt(process.env.IMAGE_QUALITY) || 80,
-    enableWatermark: process.env.ENABLE_WATERMARK === 'true',
-    watermarkText: process.env.WATERMARK_TEXT || 'ZeroU-ImgBed'
+    quality: parseInt(process.env.IMAGE_QUALITY) || 80
   },
   
   security: {

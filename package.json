@@ -7,20 +7,24 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
-    "build": "echo 'Build completed'",
-    "test": "echo 'Test completed'",
+    "build": "npm run generate",
+    "test": "node tests/test-features.js && node tests/test-rate-limit.js",
+    "test:features": "node tests/test-features.js",
+    "test:rate-limit": "node tests/test-rate-limit.js",
     "lint": "echo 'Lint completed'",
     "migrate": "npx prisma migrate dev",
     "generate": "npx prisma generate",
     "studio": "npx prisma studio",
     "seed": "node prisma/seed.js",
-    "db:init": "npm run migrate && npm run seed",
+    "db:init": "npm run generate && npm run migrate && npm run seed",
+    "db:reset": "npx prisma migrate reset --force && npm run seed",
     "docker:build": "docker build -t zerou-imgbed .",
     "docker:run": "docker run -p 3000:3000 zerou-imgbed",
     "docker:compose": "docker-compose up -d",
     "docker:compose:down": "docker-compose down",
     "docker:compose:prod": "docker-compose -f docker-compose.prod.yml up -d",
-    "docker:logs": "docker-compose logs -f"
+    "docker:logs": "docker-compose logs -f",
+    "clean": "rm -rf node_modules package-lock.json && npm install"
   },
   "keywords": [
     "imgbed",
@@ -32,20 +36,21 @@
   "author": "cipheror",
   "license": "MIT",
   "dependencies": {
-    "fastify": "^4.24.3",
-    "@fastify/multipart": "^8.0.0",
-    "@fastify/static": "^6.12.0",
+    "@fastify/cookie": "^9.1.0",
     "@fastify/cors": "^8.4.0",
     "@fastify/jwt": "^7.2.4",
-    "@fastify/cookie": "^9.1.0",
-    "prisma": "^5.6.0",
+    "@fastify/multipart": "^8.0.0",
+    "@fastify/rate-limit": "^8.1.1",
+    "@fastify/static": "^6.12.0",
     "@prisma/client": "^5.6.0",
-    "sharp": "^0.32.6",
     "bcryptjs": "^2.4.3",
-    "nanoid": "^5.0.3",
     "dotenv": "^16.3.1",
+    "fastify": "^4.24.3",
+    "nanoid": "^5.0.3",
     "pino": "^8.16.2",
-    "pino-pretty": "^10.2.3"
+    "pino-pretty": "^10.2.3",
+    "prisma": "^5.6.0",
+    "sharp": "^0.32.6"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

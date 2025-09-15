@@ -1,11 +1,19 @@
 import bcrypt from 'bcryptjs'
 import prisma from '../utils/database.js'
 import { cache } from '../utils/cache.js'
+import { rateLimitConfigs } from '../utils/rateLimiter.js'
+import { config } from '../config/index.js'
 
 export default async function authRoutes(fastify) {
   
-  // 用户注册
+  // 用户注册 - 应用严格限流
   fastify.post('/register', {
+    config: {
+      rateLimit: {
+        max: 20, // 每15分钟最多20次注册尝试
+        timeWindow: 900000
+      }
+    },
     schema: {
       body: {
         type: 'object',
@@ -18,6 +26,14 @@ export default async function authRoutes(fastify) {
       }
     }
   }, async (request, reply) => {
+    // 检查是否启用注册功能
+    if (!config.features.enableRegistration) {
+      return reply.code(403).send({
+        error: 'REGISTRATION_DISABLED',
+        message: '注册功能已被管理员禁用'
+      })
+    }
+
     const { username, email, password } = request.body
     
     try {
@@ -88,8 +104,14 @@ export default async function authRoutes(fastify) {
     }
   })
   
-  // 用户登录
+  // 用户登录 - 应用严格限流
   fastify.post('/login', {
+    config: {
+      rateLimit: {
+        max: 30, // 每15分钟最多30次登录尝试
+        timeWindow: 900000
+      }
+    },
     schema: {
       body: {
         type: 'object',

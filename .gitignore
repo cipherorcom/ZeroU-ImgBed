@@ -8,8 +8,9 @@ node_modules/
 database/
 prisma/db/
 
-# 上传文件目录
-uploads/
+# 上传文件目录（但保留目录结构）
+uploads/*
+!uploads/.gitkeep
 
 # 日志文件
 logs/

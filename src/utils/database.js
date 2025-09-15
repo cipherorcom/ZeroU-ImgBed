@@ -95,7 +95,6 @@ export const userOperations = {
       where: { id },
       include: { 
         images: {
-          where: { status: { not: 'DELETED' } },
           orderBy: { createdAt: 'desc' },
           take: 10
         }
@@ -144,8 +143,7 @@ export const imageOperations = {
     const [images, total] = await Promise.all([
       prisma.image.findMany({
         where: { 
-          userId,
-          status: { not: 'DELETED' }
+          userId
         },
         orderBy: { createdAt: 'desc' },
         skip,
